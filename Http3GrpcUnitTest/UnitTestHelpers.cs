@@ -27,16 +27,8 @@ namespace Http3GrpcUnitTest
 
         public static async Task<string> Ping(HttpClient httpClient, string url)
         {
-            try
-            {
-                var result = await httpClient.GetAsync(url + "/api/greet/ping");
-                return await result.Content.ReadAsStringAsync();
-            }
-            catch
-            {
-                
-            }
-            return null;
+            var result = await httpClient.GetAsync(url + "/api/greet/ping");
+            return await result.Content.ReadAsStringAsync();
         }
     }
 }
