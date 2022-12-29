@@ -82,6 +82,11 @@ COPY . .
 RUN dotnet restore GrpcService/GrpcService.csproj
 RUN dotnet restore Http3GrpcUnitTest/Http3GrpcUnitTest.csproj
 
+WORKDIR /app/GrpcService
+RUN dotnet build GrpcService.csproj
+
+WORKDIR /app/Http3GrpcUnitTest
+RUN dotnet build Http3GrpcUnitTest.csproj
 
 WORKDIR /tmp
 RUN mkdir certs private
