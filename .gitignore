@@ -1,0 +1,9 @@
+GrpcService/bin/
+GrpcService/obj/
+GrpcTester/.vs/
+GrpcTester/bin/
+GrpcTester/obj/
+Http3GrpcUnitTest/.vs/
+Http3GrpcUnitTest/bin/
+Http3GrpcUnitTest/obj/
+GrpcService/.vs/
