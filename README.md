@@ -6,3 +6,4 @@ To build and run the container execute the following commands:
 
 docker build -t grpchttp3 -f Dockerfile .
 
+docker run grpchttp3
