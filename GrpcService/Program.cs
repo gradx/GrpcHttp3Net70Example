@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using System.Net;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +22,7 @@ builder.Services.AddAuthentication(CertificateAuthenticationDefaults.Authenticat
     .AddCertificate(options =>
     {
         options.AllowedCertificateTypes = CertificateTypes.All;
-        options.RevocationMode = System.Security.Cryptography.X509Certificates.X509RevocationMode.NoCheck;
+        options.RevocationMode = X509RevocationMode.NoCheck;
     });
 
 builder.Services.AddGrpc();
