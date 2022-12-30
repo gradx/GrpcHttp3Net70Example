@@ -55,6 +55,7 @@ RUN apt-get update \
         bash \
         git \
         wget \
+        bash \
         gnupg2
 
 # Setup http/3
