@@ -51,19 +51,8 @@ RUN powershell_version=7.3.0 \
 # Add dependencies
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        cron \
-        rsyslog \
-        iptables \
-        procps \
         curl \
         bash \
-        dos2unix \
-        build-essential \
-        cmake \
-        automake \
-        libtool \
-        autoconf \
-        kmod \
         git \
         wget \
         gnupg2
