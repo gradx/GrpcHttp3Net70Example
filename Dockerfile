@@ -115,7 +115,7 @@ RUN cp client.pfx /app/Http3GrpcUnitTest/client.pfx
 RUN openssl pkcs12 -in ca.pfx -nokeys -out /usr/local/share/ca-certificates/mydomain.crt --password pass:""
 RUN update-ca-certificates
 
-
+RUN chmod a+x /app/SSL/hosts.sh
 
 WORKDIR /app/GrpcService/bin/Debug/net7.0
 #ENTRYPOINT ["tail", "-f", "/dev/null"]
