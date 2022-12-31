@@ -56,7 +56,10 @@ RUN apt-get update \
         git \
         wget \
         bash \
-        gnupg2
+        gnupg2 \
+        procps \
+        nano \
+        net-tools
 
 # Setup http/3
 RUN curl -sSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
@@ -100,16 +103,22 @@ RUN openssl genrsa -out server.key.pem 4096
 RUN openssl req -new -key server.key.pem -out server.csr -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=chained.mydomain.com"
 RUN openssl x509 -req -in server.csr -CA certs/cacert.pem -CAkey private/cakey.pem -out server.cert.pem -CAcreateserial -days 365 -sha256 -extfile /app/SSL/server_cert_ext.cnf
 
+# Create Bad CA
+RUN openssl genrsa -out private/badcakey.pem 4096
+RUN openssl req -new -x509 -days 3650 -config openssl.cnf -extensions v3_ca -key private/badcakey.pem -out certs/badca.pem  -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=oops.com"
+RUN openssl x509 -in certs/badca.pem -out certs/badca.pem -outform PEM
 
 # Export to pfx
 RUN openssl pkcs12 -export -out ca.pfx -inkey private/cakey.pem -in certs/cacert.pem -password pass:""
 RUN openssl pkcs12 -export -out server.pfx -inkey server.key.pem -in server.cert.pem -password pass:""
 RUN openssl pkcs12 -export -out client.pfx -inkey client.key.pem -in client.cert.pem -password pass:""
+RUN openssl pkcs12 -export -out badca.pfx -inkey private/badcakey.pem -in certs/badca.pem -password pass:""
 
-RUN cp ca.pfx /app/GrpcService/bin/Debug/net7.0/ca.pfx
-RUN cp ca.pfx /app/Http3GrpcUnitTest/ca.pfx
-RUN cp server.pfx /app/GrpcService/bin/Debug/net7.0/server.pfx
-RUN cp client.pfx /app/Http3GrpcUnitTest/client.pfx
+RUN cp ca.pfx /app/GrpcService/bin/Debug/net7.0
+RUN cp ca.pfx /app/Http3GrpcUnitTest
+RUN cp server.pfx /app/GrpcService/bin/Debug/net7.0
+RUN cp client.pfx /app/Http3GrpcUnitTest
+RUN cp badca.pfx /app/Http3GrpcUnitTest
 
 # Update Certificates
 RUN openssl pkcs12 -in ca.pfx -nokeys -out /usr/local/share/ca-certificates/mydomain.crt --password pass:""

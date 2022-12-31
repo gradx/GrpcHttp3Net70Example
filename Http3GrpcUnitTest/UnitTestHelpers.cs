@@ -12,13 +12,7 @@ namespace Http3GrpcUnitTest
     {
         public static HttpClient CreateHttpClient(Version version, string certificate, string password = "")
         {
-            var handler = new HttpClientHandler();
-            var cert = new X509Certificate2(certificate, password);
-            handler.ClientCertificates.Add(cert);
-            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-            handler.PreAuthenticate = true;
-
-            return new HttpClient(handler)
+            return new HttpClient(CreateHttpHandler(certificate, password))
             {
                 DefaultRequestVersion = version,
                 DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
@@ -29,6 +23,17 @@ namespace Http3GrpcUnitTest
         {
             var result = await httpClient.GetAsync(url + "/api/greet/ping");
             return await result.Content.ReadAsStringAsync();
+        }
+
+        public static HttpClientHandler CreateHttpHandler(string certificate, string password = "")
+        {
+            var handler = new HttpClientHandler();
+            var cert = new X509Certificate2(certificate, password);
+            handler.ClientCertificates.Add(cert);
+            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            handler.PreAuthenticate = true;
+
+            return handler;
         }
     }
 }

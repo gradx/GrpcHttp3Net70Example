@@ -14,7 +14,7 @@ builder.Services.Configure<KestrelServerOptions>(options =>
     options.ConfigureHttpsDefaults(options =>
     {
         options.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
-        options.AllowAnyClientCertificate();
+        //options.AllowAnyClientCertificate();
     });
 });
 

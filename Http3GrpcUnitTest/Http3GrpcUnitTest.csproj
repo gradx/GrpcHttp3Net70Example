@@ -30,6 +30,9 @@
 		<Protobuf Include="Protos\greet.proto" GrpcServices="Client" />
 	</ItemGroup>
 	<ItemGroup>
+	  <None Update="badca.pfx">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
 	  <None Update="ca.pfx">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
