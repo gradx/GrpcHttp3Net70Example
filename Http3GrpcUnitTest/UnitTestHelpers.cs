@@ -31,7 +31,7 @@ namespace Http3GrpcUnitTest
             var cert = new X509Certificate2(certificate, password);
             handler.ClientCertificates.Add(cert);
             handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-            handler.PreAuthenticate = true;
+            handler.PreAuthenticate = false;
 
             return handler;
         }
