@@ -4,6 +4,6 @@ Note: edit SSL/hosts.sh and comment out the last line (tail -f /dev/null) if you
 
 To build and run the container execute the following commands:
 
-docker build -t grpchttp3 -f Dockerfile .
+`docker build -t grpchttp3 -f Dockerfile .`
 
-docker run grpchttp3
+`docker run grpchttp3`
