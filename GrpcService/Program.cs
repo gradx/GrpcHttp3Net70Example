@@ -34,12 +34,36 @@ builder.Services.Configure<KestrelServerOptions>(options =>
         options.ClientCertificateValidation = (cert, chain, policyErrors) =>
         {
             Console.WriteLine("Cert Chain: " + chain?.ChainElements.FirstOrDefault()?.Certificate?.Subject);
+
+            // attempt to fix http3 issues but gRPC still fails
+            /*
+             *  Error Message:
+   Grpc.Core.RpcException : Status(StatusCode="Unavailable", Detail="Error starting gRPC call. HttpRequestException: Connection refused (mydomain.com:5003) SocketException: Connection refused", DebugException="System.Net.Http.HttpRequestException: Connection refused (mydomain.com:5003)
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|281_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.AddHttp2ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.HttpConnectionWaiter`1.WaitForConnectionAsync(Boolean async, CancellationToken requestCancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at Grpc.Net.Client.Internal.GrpcCall`2.RunCall(HttpRequestMessage request, Nullable`1 timeout)")
+  Stack Trace:
+     at Http3GrpcUnitTest.UnitTest1.GrpcHttpVersion30SelfSignedTest() in /app/Http3GrpcUnitTest/UnitTest1.cs:line 36
+--- End of stack trace from previous location ---*/
+
             if (policyErrors == SslPolicyErrors.RemoteCertificateNameMismatch && (cert.Subject.StartsWith("CN=mydomain.com") || cert.Subject.StartsWith("CN=chained.mydomain.com")))
                 policyErrors = SslPolicyErrors.None;
 
             if (policyErrors != SslPolicyErrors.None)
             {
-                Console.WriteLine("Certificate PolicyErrors: " + policyErrors + " for " + cert.Subject);
+                Console.WriteLine("Certificate PolicyErrors: " + policyErrors + " for " + cert.);
                 return false;
             }
             else
@@ -89,7 +113,7 @@ builder.Services.AddAuthentication(CertificateAuthenticationDefaults.Authenticat
             }
         };
         */
-    });
+        });
 
 builder.Services.AddGrpc();
 builder.Services.AddControllers();
