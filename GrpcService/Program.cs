@@ -35,7 +35,7 @@ builder.Services.Configure<KestrelServerOptions>(options =>
         {
             Console.WriteLine("Cert Chain: " + chain?.ChainElements.FirstOrDefault()?.Certificate?.Subject);
 
-            // attempt to fix http3 issues but gRPC still fails
+            // gRPC + HTTP/3 on Linux seems to require Http2 (TCP)
             /*
              *  Error Message:
    Grpc.Core.RpcException : Status(StatusCode="Unavailable", Detail="Error starting gRPC call. HttpRequestException: Connection refused (mydomain.com:5003) SocketException: Connection refused", DebugException="System.Net.Http.HttpRequestException: Connection refused (mydomain.com:5003)
@@ -63,7 +63,7 @@ builder.Services.Configure<KestrelServerOptions>(options =>
 
             if (policyErrors != SslPolicyErrors.None)
             {
-                Console.WriteLine("Certificate PolicyErrors: " + policyErrors + " for " + cert.);
+                Console.WriteLine("Certificate PolicyErrors: " + policyErrors + " for " + cert.SubjectName);
                 return false;
             }
             else
