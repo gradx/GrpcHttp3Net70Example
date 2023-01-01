@@ -105,7 +105,7 @@ RUN openssl x509 -req -in server.csr -CA certs/cacert.pem -CAkey private/cakey.p
 
 # Create Bad CA
 RUN openssl genrsa -out private/badcakey.pem 4096
-RUN openssl req -new -x509 -days 3650 -config openssl.cnf -extensions v3_ca -key private/badcakey.pem -out certs/badca.pem  -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=oops.com"
+RUN openssl req -new -x509 -days 3650 -config openssl.cnf -extensions v3_ca -key private/badcakey.pem -out certs/badca.pem  -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=mydomain.com"
 RUN openssl x509 -in certs/badca.pem -out certs/badca.pem -outform PEM
 
 # Export to pfx
@@ -114,9 +114,12 @@ RUN openssl pkcs12 -export -out server.pfx -inkey server.key.pem -in server.cert
 RUN openssl pkcs12 -export -out client.pfx -inkey client.key.pem -in client.cert.pem -password pass:""
 RUN openssl pkcs12 -export -out badca.pfx -inkey private/badcakey.pem -in certs/badca.pem -password pass:""
 
+RUN cp ca.pfx /app/GrpcService
 RUN cp ca.pfx /app/GrpcService/bin/Debug/net7.0
-RUN cp ca.pfx /app/Http3GrpcUnitTest
+RUN cp server.pfx /app/GrpcService
 RUN cp server.pfx /app/GrpcService/bin/Debug/net7.0
+
+RUN cp ca.pfx /app/Http3GrpcUnitTest
 RUN cp client.pfx /app/Http3GrpcUnitTest
 RUN cp badca.pfx /app/Http3GrpcUnitTest
 

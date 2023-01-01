@@ -16,10 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<KestrelServerOptions>(options =>
 {
     options.ConfigureHttpsDefaults(options =>
-    {
-        // fixes http3 only but disables ClientCertificateValidation callback
-        //options.ClientCertificateMode = ClientCertificateMode.DelayCertificate;
-        
+    {        
         options.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
         //options.ServerCertificateSelector = (context, subjectName) =>
         //{
@@ -31,22 +28,19 @@ builder.Services.Configure<KestrelServerOptions>(options =>
         //        return new X509Certificate2("badca.pfx");
         //};
 
-        options.ClientCertificateValidation = (certificate2, chain, policyErrors) =>
+        options.ClientCertificateValidation = (cert, chain, policyErrors) =>
         {
             Console.WriteLine("Cert Chain: " + chain?.ChainElements.FirstOrDefault()?.Certificate?.Subject);
-            if (policyErrors == SslPolicyErrors.RemoteCertificateNameMismatch && (certificate2.Subject.StartsWith("CN=mydomain.com") || certificate2.Subject.StartsWith("CN=chained.mydomain.com")))
+            if (policyErrors == SslPolicyErrors.RemoteCertificateNameMismatch && (cert.Subject.StartsWith("CN=mydomain.com") || cert.Subject.StartsWith("CN=chained.mydomain.com")))
                 policyErrors = SslPolicyErrors.None;
 
             if (policyErrors != SslPolicyErrors.None)
             {
-                Console.WriteLine("Certificate PolicyErrors: " + policyErrors + " for " + certificate2.Subject);
+                Console.WriteLine("Certificate PolicyErrors: " + policyErrors + " for " + cert.Subject);
                 return false;
             }
             else
-            {
-                //Console.WriteLine("Certificate PolicyErrors: " + policyErrors + " for " + certificate2.Subject);
                 return true;
-            }
         };
     });
 });
