@@ -75,7 +75,7 @@ namespace Http3GrpcUnitTest
         [Fact]
         public async Task HttpVersion30OnlyGrpcTest()
         {
-            var channel = GrpcChannel.ForAddress(c_SELF_SIGNED_URL,
+            var channel = GrpcChannel.ForAddress(c_HTTP3_SELF_SIGNED_URL,
                 new GrpcChannelOptions() { HttpClient = UnitTestHelpers.CreateHttpClient(HttpVersion.Version30, "ca.pfx") });
             var client = new Greeter.GreeterClient(channel);
             var response = await client.SayHelloAsync(new HelloRequest { Name = "World" });
