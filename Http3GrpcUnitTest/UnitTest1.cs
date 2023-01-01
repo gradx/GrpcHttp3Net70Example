@@ -12,9 +12,8 @@ namespace Http3GrpcUnitTest
         public const string c_SELF_SIGNED_URL = "https://mydomain.com:5001";
         public const string c_CHAINED_URL = "https://chained.mydomain.com:5002";
 
-        public const string c_HTTP3_SELF_SIGNED_URL = "https://mydomain.com:5003";
-
         // gRPC + HTTP3 only always errors
+        public const string c_HTTP3_SELF_SIGNED_URL = "https://mydomain.com:5003";
         public const string c_HTTP3_CHAINED_URL = "https://chained.mydomain.com:5004";
 
         #region Self Signed Tests
