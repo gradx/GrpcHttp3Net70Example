@@ -71,6 +71,9 @@ namespace Http3GrpcUnitTest
             Assert.Fail("Should not reach");
         }
 
+
+        // TODO: Erroring:  Grpc.Core.RpcException : Status(StatusCode="Unavailable", Detail="Error starting gRPC call. HttpRequestException: Connection refused (mydomain.com:5003)
+        // SocketException: Connection refused", DebugException="System.Net.Http.HttpRequestException: Connection refused (mydomain.com:5003)
         [Fact]
         public async Task HttpVersion30OnlyGrpcTest()
         {
