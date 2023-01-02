@@ -93,15 +93,17 @@ RUN sed -i 's|$dir/cacert.pem|$dir/certs/cacert.pem|' openssl.cnf
 RUN sed -i 's|./demoCA|/tmp/ca_certs|' openssl.cnf
 RUN sed -E -i 's|x509_extensions\s?=\susr_cert|x509_extensions = v3_ca|' openssl.cnf
 
+RUN cat /app/SSL/intermediate.cnf >> openssl.cnf
+
 
 RUN openssl genrsa -out private/cakey.pem 4096
 RUN openssl req -new -x509 -days 3650 -config openssl.cnf -extensions v3_ca -key private/cakey.pem -out certs/cacert.pem  -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=mydomain.com"
-#RUN openssl x509 -in certs/cacert.pem -out certs/cacert.pem -outform PEM
+RUN openssl x509 -in certs/cacert.pem -out certs/cacert.pem -outform PEM
 
 # Create Bad CA
 RUN openssl genrsa -out private/badcakey.pem 4096
 RUN openssl req -new -x509 -days 3650 -config openssl.cnf -extensions v3_ca -key private/badcakey.pem -out certs/badca.pem  -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=mydomain.com"
-#RUN openssl x509 -in certs/badca.pem -out certs/badca.pem -outform PEM
+RUN openssl x509 -in certs/badca.pem -out certs/badca.pem -outform PEM
 
 # Create Intermediate CA
 RUN mkdir /tmp/ca_certs/intermediate
@@ -115,15 +117,18 @@ RUN echo 01 > /tmp/ca_certs/intermediate/crlnumber
 RUN cp ../openssl.cnf .
 
 RUN sed -i 's|/tmp/ca_certs|/tmp/ca_certs/intermediate|' openssl.cnf
-RUN cat /app/SSL/intermediate.cnf >> openssl.cnf
+RUN sed -i 's|$dir/certs/cacert.pem|$dir/certs/intermediate.cacert.pem |' openssl.cnf
+RUN sed -i 's|$dir/private/cakey.pem|$dir/private/intermediate.cakey.pem |' openssl.cnf
+RUN sed -E -i 's|policy\s?+=\spolicy_match|policy          = policy_anything|' openssl.cnf
+
 
 RUN openssl genrsa -out private/intermediate.cakey.pem 4096
 RUN openssl req -new -sha256 -config openssl.cnf -key private/intermediate.cakey.pem -out csr/intermediate.csr.pem  -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=int.mydomain.com"
+
 # need to fix this
-RUN cp ../private/cakey.pem private
-RUN cp ../certs/cacert.pem certs
-RUN openssl ca -config openssl.cnf -extensions v3_intermediate_ca -days 2650 -notext -batch -in csr/intermediate.csr.pem -out certs/intermediate.cacert.pem
-RUN cat certs/intermediate.cacert.pem certs/cacert.pem > certs/ca-chain-bundle.cert.pem
+RUN openssl ca -config ../openssl.cnf -extensions v3_intermediate_ca -days 2650 -notext -md sha256 -batch -in csr/intermediate.csr.pem -out certs/intermediate.cacert.pem
+RUN openssl x509 -in certs/intermediate.cacert.pem -out certs/intermediate.cacert.pem -outform PEM
+RUN cat certs/intermediate.cacert.pem ../certs/cacert.pem > certs/ca-chain-bundle.cert.pem
 
 # Create Client
 RUN openssl genrsa -out client.key.pem 4096
