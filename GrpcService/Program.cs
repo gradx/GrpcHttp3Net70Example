@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
+using System;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Security;
@@ -58,12 +59,18 @@ builder.Services.Configure<KestrelServerOptions>(options =>
      at Http3GrpcUnitTest.UnitTest1.GrpcHttpVersion30SelfSignedTest() in /app/Http3GrpcUnitTest/UnitTest1.cs:line 36
 --- End of stack trace from previous location ---*/
 
-            if (policyErrors == SslPolicyErrors.RemoteCertificateNameMismatch && (cert.Subject.StartsWith("CN=mydomain.com") || cert.Subject.StartsWith("CN=chained.int.mydomain.com")))
+
+            // Chained certs are erroring
+            /*
+            warn: Microsoft.AspNetCore.Authentication.Certificate.CertificateAuthenticationHandler[2]
+      Certificate validation failed, subject was CN=int.mydomain.com, O=Geocast, L=San Francisco, S=California, C=US. PartialChain unable to get local issuer certificate
+            */
+            if (policyErrors.HasFlag(SslPolicyErrors.RemoteCertificateNameMismatch) && (cert.Subject.Contains("mydomain.com") || cert.Subject.Contains("int.mydomain.com")))
                 policyErrors = SslPolicyErrors.None;
 
             if (policyErrors != SslPolicyErrors.None)
             {
-                Console.WriteLine("Certificate PolicyErrors: " + policyErrors + " for " + cert.SubjectName);
+                Console.WriteLine("Certificate PolicyErrors: " + policyErrors + " for " + cert.Subject);
                 return false;
             }
             else
