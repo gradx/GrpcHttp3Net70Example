@@ -42,7 +42,6 @@ builder.Services.Configure<KestrelServerOptions>(options =>
             if (policyErrors.HasFlag(SslPolicyErrors.RemoteCertificateNameMismatch) && (cert.Subject.Contains("mydomain.com") || cert.Subject.Contains("int.mydomain.com")))
                 policyErrors &= ~SslPolicyErrors.RemoteCertificateNameMismatch;
 
-
             if (policyErrors != SslPolicyErrors.None)
             {                
                 Console.WriteLine($@"Certificate PolicyErrors ({chain?.ChainStatus.Length}):" + policyErrors + " with status: " + chain?.ChainStatus.FirstOrDefault().StatusInformation + " for " + cert.Subject);               
