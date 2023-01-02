@@ -98,12 +98,12 @@ RUN cat /app/SSL/intermediate.cnf >> openssl.cnf
 
 RUN openssl genrsa -out private/cakey.pem 4096
 RUN openssl req -new -x509 -days 3650 -config openssl.cnf -extensions v3_ca -key private/cakey.pem -out certs/cacert.pem  -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=mydomain.com"
-RUN openssl x509 -in certs/cacert.pem -out certs/cacert.pem -outform PEM
+#RUN openssl x509 -in certs/cacert.pem -out certs/cacert.pem -outform PEM
 
 # Create Bad CA
 RUN openssl genrsa -out private/badcakey.pem 4096
 RUN openssl req -new -x509 -days 3650 -config openssl.cnf -extensions v3_ca -key private/badcakey.pem -out certs/badca.pem  -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=mydomain.com"
-RUN openssl x509 -in certs/badca.pem -out certs/badca.pem -outform PEM
+#RUN openssl x509 -in certs/badca.pem -out certs/badca.pem -outform PEM
 
 # Create Intermediate CA
 RUN mkdir /tmp/ca_certs/intermediate
@@ -126,7 +126,7 @@ RUN openssl genrsa -out private/intermediate.cakey.pem 4096
 RUN openssl req -new -sha256 -config openssl.cnf -key private/intermediate.cakey.pem -out csr/intermediate.csr.pem  -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=int.mydomain.com"
 
 RUN openssl ca -config ../openssl.cnf -extensions v3_intermediate_ca -days 2650 -notext -md sha256 -batch -in csr/intermediate.csr.pem -out certs/intermediate.cacert.pem
-RUN openssl x509 -in certs/intermediate.cacert.pem -out certs/intermediate.cacert.pem -outform PEM
+#RUN openssl x509 -in certs/intermediate.cacert.pem -out certs/intermediate.cacert.pem -outform PEM
 RUN cat certs/intermediate.cacert.pem ../certs/cacert.pem > certs/ca-chain-bundle.cert.pem
 
 # Create Client
@@ -159,7 +159,7 @@ RUN cp badca.pfx /app/Http3GrpcUnitTest
 # Update Certificates
 RUN openssl pkcs12 -in ca.pfx -nokeys -out /usr/local/share/ca-certificates/mydomain.crt --password pass:""
 # Chained tests fail without this
-#RUN openssl pkcs12 -in intermediate.pfx -nokeys -out /usr/local/share/ca-certificates/intermediate.crt --password pass:""
+RUN openssl pkcs12 -in intermediate.pfx -nokeys -out /usr/local/share/ca-certificates/intermediate.crt --password pass:""
 RUN update-ca-certificates
 
 RUN chmod a+x /app/SSL/hosts.sh
