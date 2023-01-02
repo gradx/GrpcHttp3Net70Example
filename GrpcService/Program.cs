@@ -58,7 +58,7 @@ builder.Services.Configure<KestrelServerOptions>(options =>
      at Http3GrpcUnitTest.UnitTest1.GrpcHttpVersion30SelfSignedTest() in /app/Http3GrpcUnitTest/UnitTest1.cs:line 36
 --- End of stack trace from previous location ---*/
 
-            if (policyErrors == SslPolicyErrors.RemoteCertificateNameMismatch && (cert.Subject.StartsWith("CN=mydomain.com") || cert.Subject.StartsWith("CN=chained.mydomain.com")))
+            if (policyErrors == SslPolicyErrors.RemoteCertificateNameMismatch && (cert.Subject.StartsWith("CN=mydomain.com") || cert.Subject.StartsWith("CN=chained.int.mydomain.com")))
                 policyErrors = SslPolicyErrors.None;
 
             if (policyErrors != SslPolicyErrors.None)

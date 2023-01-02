@@ -81,37 +81,66 @@ RUN dotnet build GrpcService.csproj
 WORKDIR /app/Http3GrpcUnitTest
 RUN dotnet build Http3GrpcUnitTest.csproj
 
-WORKDIR /tmp
-RUN mkdir certs private
+# Create CA
+RUN mkdir /tmp/ca_certs
+WORKDIR /tmp/ca_certs
+RUN mkdir certs private newcerts
 RUN echo 01 > serial
 RUN touch index.txt
 RUN cp /etc/ssl/openssl.cnf .
 
+RUN sed -i 's|$dir/cacert.pem|$dir/certs/cacert.pem|' openssl.cnf
+RUN sed -i 's|./demoCA|/tmp/ca_certs|' openssl.cnf
+RUN sed -E -i 's|x509_extensions\s?=\susr_cert|x509_extensions = v3_ca|' openssl.cnf
 
-# Create CA
+
 RUN openssl genrsa -out private/cakey.pem 4096
 RUN openssl req -new -x509 -days 3650 -config openssl.cnf -extensions v3_ca -key private/cakey.pem -out certs/cacert.pem  -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=mydomain.com"
-RUN openssl x509 -in certs/cacert.pem -out certs/cacert.pem -outform PEM
-
-# Create Client
-RUN openssl genrsa -out client.key.pem 4096
-RUN openssl req -new -key client.key.pem -out client.csr -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=chained.mydomain.com"
-RUN openssl x509 -req -in client.csr -CA certs/cacert.pem -CAkey private/cakey.pem -out client.cert.pem -CAcreateserial -days 365 -sha256 -extfile /app/SSL/client_cert_ext.cnf
-
-# Create Server
-RUN openssl genrsa -out server.key.pem 4096
-RUN openssl req -new -key server.key.pem -out server.csr -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=chained.mydomain.com"
-RUN openssl x509 -req -in server.csr -CA certs/cacert.pem -CAkey private/cakey.pem -out server.cert.pem -CAcreateserial -days 365 -sha256 -extfile /app/SSL/server_cert_ext.cnf
+#RUN openssl x509 -in certs/cacert.pem -out certs/cacert.pem -outform PEM
 
 # Create Bad CA
 RUN openssl genrsa -out private/badcakey.pem 4096
 RUN openssl req -new -x509 -days 3650 -config openssl.cnf -extensions v3_ca -key private/badcakey.pem -out certs/badca.pem  -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=mydomain.com"
-RUN openssl x509 -in certs/badca.pem -out certs/badca.pem -outform PEM
+#RUN openssl x509 -in certs/badca.pem -out certs/badca.pem -outform PEM
+
+# Create Intermediate CA
+RUN mkdir /tmp/ca_certs/intermediate
+WORKDIR /tmp/ca_certs/intermediate
+
+RUN mkdir certs csr private newcerts
+RUN touch index.txt
+RUn echo 01 > serial
+RUN echo 01 > /tmp/ca_certs/intermediate/crlnumber
+
+RUN cp ../openssl.cnf .
+
+RUN sed -i 's|/tmp/ca_certs|/tmp/ca_certs/intermediate|' openssl.cnf
+RUN cat /app/SSL/intermediate.cnf >> openssl.cnf
+
+RUN openssl genrsa -out private/intermediate.cakey.pem 4096
+RUN openssl req -new -sha256 -config openssl.cnf -key private/intermediate.cakey.pem -out csr/intermediate.csr.pem  -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=int.mydomain.com"
+# need to fix this
+RUN cp ../private/cakey.pem private
+RUN cp ../certs/cacert.pem certs
+RUN openssl ca -config openssl.cnf -extensions v3_intermediate_ca -days 2650 -notext -batch -in csr/intermediate.csr.pem -out certs/intermediate.cacert.pem
+RUN cat certs/intermediate.cacert.pem certs/cacert.pem > certs/ca-chain-bundle.cert.pem
+
+# Create Client
+RUN openssl genrsa -out client.key.pem 4096
+RUN openssl req -new -key client.key.pem -out client.csr -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=chained.int.mydomain.com"
+RUN openssl x509 -req -in client.csr -CA certs/ca-chain-bundle.cert.pem -CAkey private/intermediate.cakey.pem -out client.cert.pem -CAcreateserial -days 365 -sha256 -extfile /app/SSL/client_cert_ext.cnf
+
+# Create Server
+RUN openssl genrsa -out server.key.pem 4096
+RUN openssl req -new -key server.key.pem -out server.csr -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=chained.int.mydomain.com"
+RUN openssl x509 -req -in server.csr -CA certs/ca-chain-bundle.cert.pem -CAkey private/intermediate.cakey.pem -out server.cert.pem -CAcreateserial -days 365 -sha256 -extfile /app/SSL/server_cert_ext.cnf
 
 # Export to pfx
+WORKDIR ..
 RUN openssl pkcs12 -export -out ca.pfx -inkey private/cakey.pem -in certs/cacert.pem -password pass:""
-RUN openssl pkcs12 -export -out server.pfx -inkey server.key.pem -in server.cert.pem -password pass:""
-RUN openssl pkcs12 -export -out client.pfx -inkey client.key.pem -in client.cert.pem -password pass:""
+RUN openssl pkcs12 -export -out intermediate.pfx -inkey intermediate/private/intermediate.cakey.pem -in intermediate/certs/intermediate.cacert.pem -password pass:""
+RUN openssl pkcs12 -export -out server.pfx -inkey intermediate/server.key.pem -in intermediate/server.cert.pem -password pass:""
+RUN openssl pkcs12 -export -out client.pfx -inkey intermediate/client.key.pem -in intermediate/client.cert.pem -password pass:""
 RUN openssl pkcs12 -export -out badca.pfx -inkey private/badcakey.pem -in certs/badca.pem -password pass:""
 
 RUN cp ca.pfx /app/GrpcService
@@ -125,6 +154,7 @@ RUN cp badca.pfx /app/Http3GrpcUnitTest
 
 # Update Certificates
 RUN openssl pkcs12 -in ca.pfx -nokeys -out /usr/local/share/ca-certificates/mydomain.crt --password pass:""
+RUN openssl pkcs12 -in intermediate.pfx -nokeys -out /usr/local/share/ca-certificates/intermediate.crt --password pass:""
 RUN update-ca-certificates
 
 RUN chmod a+x /app/SSL/hosts.sh
