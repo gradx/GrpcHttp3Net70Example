@@ -173,7 +173,7 @@ namespace Http3GrpcUnitTest
         [Fact]
         public async Task GrpcHttp3Chained()
         {
-            var channel = GrpcChannel.ForAddress(c_HTTP3_SELF_SIGNED_URL,
+            var channel = GrpcChannel.ForAddress(c_HTTP3_CHAINED_URL,
                 new GrpcChannelOptions() { HttpClient = UnitTestHelpers.CreateHttpClient(HttpVersion.Version30, "client.pfx") });
 
             var client = new Greeter.GreeterClient(channel);
