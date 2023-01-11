@@ -15,7 +15,7 @@ namespace Http3GrpcUnitTest
             return new HttpClient(CreateHttpHandler(certificate, password))
             {
                 DefaultRequestVersion = version,
-                DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
+                DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher
             };
         }
 

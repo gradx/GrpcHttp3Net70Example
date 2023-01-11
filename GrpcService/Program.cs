@@ -20,6 +20,7 @@ builder.Services.Configure<KestrelServerOptions>(options =>
     {
         options.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
 
+
         /*
         options.CheckCertificateRevocation = false;
         options.ServerCertificateSelector = (context, subjectName) =>
@@ -38,13 +39,16 @@ builder.Services.Configure<KestrelServerOptions>(options =>
             Console.WriteLine("Cert Chain: " + chain?.ChainElements.FirstOrDefault()?.Certificate?.Subject);
 
             // Fixes http3 errors
+            // https://github.com/dotnet/dotnet/blob/bc97c03146a6a9f7b951c4b9b0fbe18a4b5ff439/src/runtime/src/libraries/System.Net.Quic/src/System/Net/Quic/QuicConnection.cs
+            // https://github.com/dotnet/dotnet/blob/b8bc661a7429baa89070f3bee636b7fbc1309489/src/runtime/src/libraries/System.Net.Quic/src/System/Net/Quic/QuicConnection.SslConnectionOptions.cs
             // Certificate PolicyErrors (0):RemoteCertificateNameMismatch with status:  for CN=mydomain.com, O=Geocast, L=San Francisco, S=California, C=US
             if (policyErrors.HasFlag(SslPolicyErrors.RemoteCertificateNameMismatch) && (cert.Subject.Contains("mydomain.com") || cert.Subject.Contains("int.mydomain.com")))
                 policyErrors &= ~SslPolicyErrors.RemoteCertificateNameMismatch;
 
             if (policyErrors != SslPolicyErrors.None)
-            {                
-                Console.WriteLine($@"Certificate PolicyErrors ({chain?.ChainStatus.Length}):" + policyErrors + " with status: " + chain?.ChainStatus.FirstOrDefault().StatusInformation + " for " + cert.Subject);               
+            {
+                Console.WriteLine($@"Certificate: " + cert.Subject);
+                Console.WriteLine($@"Chain PolicyErrors ({chain?.ChainStatus.Length}):" + policyErrors + " with status: " + chain?.ChainStatus.FirstOrDefault().StatusInformation + " for " + cert.Subject);               
                 return false;
             }
             else
@@ -60,6 +64,7 @@ builder.Services.AddAuthentication(CertificateAuthenticationDefaults.Authenticat
         options.AllowedCertificateTypes = CertificateTypes.All;
         options.RevocationMode = X509RevocationMode.NoCheck;
 
+        
 
         /*
         options.ValidateCertificateUse = false;

@@ -136,8 +136,8 @@ RUN openssl x509 -req -in client.csr -CA certs/ca-chain-bundle.cert.pem -CAkey p
 
 # Create Server
 RUN openssl genrsa -out server.key.pem 4096
-RUN openssl req -new -key server.key.pem -out server.csr -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=int.mydomain.com" -config /app/SSL/server.cnf
-RUN openssl x509 -req -in server.csr -CA certs/ca-chain-bundle.cert.pem -CAkey private/intermediate.cakey.pem -out server.cert.pem -CAcreateserial -days 365 -sha256 -extensions req_ext -extfile /app/SSL/server.cnf
+RUN openssl req -new -key server.key.pem -out server.csr -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=int.mydomain.com" -config /app/SSL/server_cert_ext.cnf
+RUN openssl x509 -req -in server.csr -CA certs/ca-chain-bundle.cert.pem -CAkey private/intermediate.cakey.pem -out server.cert.pem -CAcreateserial -days 365 -sha256 -extensions req_ext -extfile /app/SSL/server_cert_ext.cnf
 
 # Export to pfx
 WORKDIR ..

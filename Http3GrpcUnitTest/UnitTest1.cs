@@ -15,10 +15,11 @@ namespace Http3GrpcUnitTest
         // gRPC + HTTP3 only always errors
         public const string c_HTTP3_SELF_SIGNED_URL = "https://mydomain.com:5003";
         public const string c_HTTP3_CHAINED_URL = "https://int.mydomain.com:5004";
+        
 
         #region Self Signed Tests
         [Fact]
-        public async Task HttpVersion20SelfSignedTest()
+        public async Task SelfSignedTestHttpVersion20()
         {
             var client = UnitTestHelpers.CreateHttpClient(HttpVersion.Version20, "ca.pfx");
             var result = await UnitTestHelpers.Ping(client, c_SELF_SIGNED_URL);
@@ -26,7 +27,7 @@ namespace Http3GrpcUnitTest
         }
 
         [Fact]
-        public async Task HttpVersion30SelfSignedTest()
+        public async Task SelfSignedTestHttpVersion30()
         {
             var client = UnitTestHelpers.CreateHttpClient(HttpVersion.Version30, "ca.pfx");
             var result = await UnitTestHelpers.Ping(client, c_SELF_SIGNED_URL);
@@ -34,7 +35,16 @@ namespace Http3GrpcUnitTest
         }
 
         [Fact]
-        public async Task GrpcHttpVersion30SelfSignedTest()
+        public async Task SelfSignedTestHttpVersion30Only()
+        {
+            var client = UnitTestHelpers.CreateHttpClient(HttpVersion.Version30, "ca.pfx");
+            var result = await client.GetAsync(c_HTTP3_SELF_SIGNED_URL + "/api/greet/ping");
+            var content = await result.Content.ReadAsStringAsync();
+            Assert.True(content == "Pong");
+        }
+
+        [Fact]
+        public async Task SelfSignedTestGrpcHttpVersion30()
         {
 
             var channel = GrpcChannel.ForAddress(c_SELF_SIGNED_URL,
@@ -45,16 +55,7 @@ namespace Http3GrpcUnitTest
         }
 
         [Fact]
-        public async Task HttpVersion30OnlySelfSignedTest()
-        {
-            var client = UnitTestHelpers.CreateHttpClient(HttpVersion.Version30, "ca.pfx");
-            var result = await client.GetAsync(c_HTTP3_SELF_SIGNED_URL + "/api/greet/ping");
-            var content = await result.Content.ReadAsStringAsync();
-            Assert.True(content == "Pong");
-        }
-
-        [Fact]
-        public async Task BadHttpSelfSignedTest()
+        public async Task SelfSignedTestFailureCheck()
         {
             try
             {
@@ -70,6 +71,68 @@ namespace Http3GrpcUnitTest
 
             Assert.Fail("Should not reach");
         }
+
+        #endregion
+
+        #region Chained Tests
+
+        [Fact]
+        public async Task ChainedTestHttpVersion20()
+        {
+            var client = UnitTestHelpers.CreateHttpClient(HttpVersion.Version20, "client.pfx");
+            var result = await UnitTestHelpers.Ping(client, c_CHAINED_URL);
+            Assert.True(result == "Pong");
+        }
+
+        [Fact]
+        public async Task ChainedTestHttpVersion30()
+        {
+            var client = UnitTestHelpers.CreateHttpClient(HttpVersion.Version30, "client.pfx");
+            var result = await UnitTestHelpers.Ping(client, c_CHAINED_URL);
+            Assert.True(result == "Pong");
+        }
+
+        [Fact]
+        public async Task ChainedTestHttpVersion30Only()
+        {
+            var client = UnitTestHelpers.CreateHttpClient(HttpVersion.Version30, "client.pfx");
+            var result = await UnitTestHelpers.Ping(client, c_HTTP3_CHAINED_URL);
+            Assert.True(result == "Pong");
+        }
+
+        [Fact]
+        public async Task ChainedTestGrpcHttpVersion30()
+        {
+
+            var channel = GrpcChannel.ForAddress(c_CHAINED_URL,
+                new GrpcChannelOptions() { HttpClient = UnitTestHelpers.CreateHttpClient(HttpVersion.Version30, "client.pfx") });
+
+            var client = new Greeter.GreeterClient(channel);
+            var response = await client.SayHelloAsync(new HelloRequest { Name = "World" });
+            Assert.True(response.Message == "Hello World");
+        }
+
+        [Fact]
+        public async Task ChainedTestFailureCheck()
+        {
+            try
+            {
+                var client = UnitTestHelpers.CreateHttpClient(HttpVersion.Version20, "badca.pfx");
+                var result = await client.GetAsync(c_CHAINED_URL + "/api/greet/ping");
+                var content = await result.Content.ReadAsStringAsync();
+                Assert.True(content != "Pong");
+            }
+            catch (System.Net.Http.HttpRequestException)
+            {
+                return;
+            }
+
+            Assert.Fail("Should not reach");
+        }
+
+        #endregion
+
+        #region Failing Tests
 
         // ***************************************************
         // gRPC + HTTP/3 on Linux seems to require Http2 (TCP)
@@ -96,8 +159,9 @@ namespace Http3GrpcUnitTest
         Stack Trace:
             at Http3GrpcUnitTest.UnitTest1.GrpcHttpVersion30SelfSignedTest() in /app/Http3GrpcUnitTest/UnitTest1.cs:line 36
         --- End of stack trace from previous location ---*/
+
         [Fact]
-        public async Task HttpVersion30OnlyGrpcTest()
+        public async Task GrpcHttp3()
         {
             var channel = GrpcChannel.ForAddress(c_HTTP3_SELF_SIGNED_URL,
                 new GrpcChannelOptions() { HttpClient = UnitTestHelpers.CreateHttpClient(HttpVersion.Version30, "ca.pfx") });
@@ -106,75 +170,16 @@ namespace Http3GrpcUnitTest
             Assert.True(response.Message == "Hello World");
         }
 
-
-        #endregion
-
-        #region Chained Tests
-
         [Fact]
-        public async Task HttpVersion20ChainedTest()
+        public async Task GrpcHttp3Chained()
         {
-            var client = UnitTestHelpers.CreateHttpClient(HttpVersion.Version20, "client.pfx");
-            var result = await UnitTestHelpers.Ping(client, c_CHAINED_URL);
-            Assert.True(result == "Pong");
-        }
-
-        [Fact]
-        public async Task HttpVersion30ChainedTest()
-        {
-            var client = UnitTestHelpers.CreateHttpClient(HttpVersion.Version30, "client.pfx");
-            var result = await UnitTestHelpers.Ping(client, c_CHAINED_URL);
-            Assert.True(result == "Pong");
-        }
-
-
-        [Fact] 
-        public async Task GrpcHttpVersion30ChainedTest()
-        {
-
-            var channel = GrpcChannel.ForAddress(c_CHAINED_URL,
+            var channel = GrpcChannel.ForAddress(c_HTTP3_SELF_SIGNED_URL,
                 new GrpcChannelOptions() { HttpClient = UnitTestHelpers.CreateHttpClient(HttpVersion.Version30, "client.pfx") });
+
             var client = new Greeter.GreeterClient(channel);
             var response = await client.SayHelloAsync(new HelloRequest { Name = "World" });
             Assert.True(response.Message == "Hello World");
         }
-
-        [Fact]
-        public async Task HttpVersion30OnlyChainedTest()
-        {
-            var client = UnitTestHelpers.CreateHttpClient(HttpVersion.Version30, "client.pfx");
-            var result = await UnitTestHelpers.Ping(client, c_HTTP3_CHAINED_URL);
-            Assert.True(result == "Pong");
-        }
-
-
-        // TODO: Errors
-
-        /*
-        [Fact]
-        public async Task GrpcHttpVersion30OnlyChainedTest()
-        {
-
-            var options = new GrpcChannelOptions()
-            {
-                HttpClient = UnitTestHelpers.CreateHttpClient(HttpVersion.Version30, "client.pfx")
-            };
-
-            
-            options.UnsafeUseInsecureChannelCallCredentials = true;
-            options.DisableResolverServiceConfig = true;
-            
-            var channel = GrpcChannel.ForAddress(c_HTTP3_CHAINED_URL,options);
-
-            await channel.ConnectAsync();
-            
-            var client = new Greeter.GreeterClient(channel);
-
-
-            var response = await client.SayHelloAsync(new HelloRequest { Name = "World" });
-            Assert.True(response.Message == "Hello World");
-        }
-        */
 
         #endregion
     }
