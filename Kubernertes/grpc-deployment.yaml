@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grpchttp3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grpchttp3
+  template:
+    metadata:
+      labels:
+        app: grpchttp3
+    spec:
+      containers:
+      - image: container.azurecr.io/grpchttp3:949
+        name: grpchttp3
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5001
+          name: grpchttp3
+      imagePullSecrets:
+      - name: secret-auth
