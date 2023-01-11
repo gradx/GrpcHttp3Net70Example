@@ -3,7 +3,7 @@ kind: Service
 metadata:
   annotations:
     service.beta.kubernetes.io/azure-load-balancer-resource-group: servers
-  name: grpchttp3udptcp
+  name: chainedtcp
 spec:
   loadBalancerIP: 20.3.166.28
   type: LoadBalancer
