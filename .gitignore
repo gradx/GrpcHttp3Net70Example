@@ -7,3 +7,4 @@ Http3GrpcUnitTest/.vs/
 Http3GrpcUnitTest/bin/
 Http3GrpcUnitTest/obj/
 GrpcService/.vs/
+SSL/Certs/
