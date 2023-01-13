@@ -6,5 +6,5 @@ To build and run the unit tests:
 
 `run.sh`
 
-# ON WSL
+## Windows requires WSL2
 `bash run.sh`
