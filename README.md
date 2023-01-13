@@ -4,7 +4,7 @@ Note: edit SSL/hosts.sh and comment out the last line (tail -f /dev/null) if you
 
 To build and run the unit tests:
 
-`run.sh`
+`sh run.sh`
 
 ## Windows requires WSL2
 `bash run.sh`
