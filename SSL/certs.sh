@@ -50,19 +50,19 @@ sed -E -i 's|policy\s?+=\spolicy_match|policy          = policy_anything|' opens
 
 
 openssl genrsa -out private/intermediate.cakey.pem 4096
-openssl req -new -sha256 -config openssl.cnf -key private/intermediate.cakey.pem -out csr/intermediate.csr.pem  -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=int.mydomain.com"
+openssl req -new -sha256 -config openssl.cnf -key private/intermediate.cakey.pem -out csr/intermediate.csr.pem  -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=mydomain.com, CN=int.mydomain.com"
 
 openssl ca -config ../openssl.cnf -extensions v3_intermediate_ca -days 2650 -notext -batch -in csr/intermediate.csr.pem -out certs/intermediate.cacert.pem -md sha256
 cat certs/intermediate.cacert.pem ../certs/cacert.pem > certs/ca-chain-bundle.cert.pem
 
 # Create Client
 openssl genrsa -out client.key.pem 4096
-openssl req -new -key client.key.pem -out client.csr -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=$cn_name"
+openssl req -new -key client.key.pem -out client.csr -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=mydomain.com, CN=int.mydomain.com, CN=$cn_name"
 openssl x509 -req -in client.csr -CA certs/ca-chain-bundle.cert.pem -CAkey private/intermediate.cakey.pem -out client.cert.pem -CAcreateserial -days 365 -sha256 -extfile $script_dir/SSL/client_cert_ext.cnf
 
 # Create Server
 openssl genrsa -out server.key.pem 4096
-openssl req -new -key server.key.pem -out server.csr -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=$cn_name" -config $script_dir/SSL/server_cert_ext.cnf
+openssl req -new -key server.key.pem -out server.csr -subj "/C=US/ST=California/L=San Francisco/O=Geocast/CN=mydomain.com, CN=int.mydomain.com, CN=$cn_name" -config $script_dir/SSL/server_cert_ext.cnf
 openssl x509 -req -in server.csr -CA certs/intermediate.cacert.pem -CAkey private/intermediate.cakey.pem -out server.cert.pem -CAcreateserial -days 365 -sha256 -extensions req_ext -extfile $script_dir/SSL/server_cert_ext.cnf
 
 # Export to pfx
