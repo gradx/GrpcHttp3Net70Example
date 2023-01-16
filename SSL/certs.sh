@@ -10,7 +10,8 @@ rm -f /usr/local/share/ca-certificates/mydomain.crt /etc/ssl/certs/mydomain.pem
 rm -f /usr/local/share/ca-certificates/int.crt /etc/ssl/certs/int.pem
 
 rm -rf /tmp/ca_certs
-rm -rf $script_dir/SSL/Certs/*
+rm -rf $script_dir/SSL/Certs
+mkdir $script_dir/SSL/Certs
 
 mkdir /tmp/ca_certs
 cd /tmp/ca_certs
