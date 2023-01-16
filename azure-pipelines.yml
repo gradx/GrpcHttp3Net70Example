@@ -13,7 +13,7 @@ variables:
   dockerRegistryServiceConnection: 'a5378ad4-694c-4c39-8298-f4bd11f00306'
   imageRepository: 'grpchttp3'
   containerRegistry: 'luxurai.azurecr.io'
-  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
+  dockerfilePath: '$(Build.SourcesDirectory)/grpc.Dockerfile'
   tag: '$(Build.BuildId)'
 
   # Agent VM image name
