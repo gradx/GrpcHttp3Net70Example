@@ -14,13 +14,15 @@ variables:
   imageRepository: 'grpchttp3'
   containerRegistry: 'luxurai.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/grpc.Dockerfile'
+  imageRepository2: 'envoyhttp3'
+  dockerfilePath2: '$(Build.SourcesDirectory)/grpc.Dockerfile'
   tag: '$(Build.BuildId)'
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
 stages:
-- stage: Build
+- stage: Build Grpc
   displayName: Build and push stage
   jobs:
   - job: Build
@@ -38,3 +40,22 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
+          $latest
+- stage: Build Envoy
+  displayName: Build and push stage
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepository2)
+        dockerfile: $(dockerfilePath2)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+          $latest
