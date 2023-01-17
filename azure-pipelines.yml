@@ -40,7 +40,7 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
-          $latest
+          latest
 - stage: BuildEnvoy
   displayName: Build and push stage
   jobs:
@@ -58,4 +58,4 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
-          $latest
+          latest
