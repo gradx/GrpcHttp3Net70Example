@@ -22,7 +22,7 @@ variables:
   vmImageName: 'ubuntu-latest'
 
 stages:
-- stage: Build Grpc
+- stage: BuildGrpc
   displayName: Build and push stage
   jobs:
   - job: Build
@@ -41,7 +41,7 @@ stages:
         tags: |
           $(tag)
           $latest
-- stage: Build Envoy
+- stage: BuildEnvoy
   displayName: Build and push stage
   jobs:
   - job: Build
