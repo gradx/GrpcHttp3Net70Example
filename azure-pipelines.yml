@@ -15,7 +15,7 @@ variables:
   containerRegistry: 'luxurai.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/grpc.Dockerfile'
   imageRepository2: 'envoyhttp3'
-  dockerfilePath2: '$(Build.SourcesDirectory)/grpc.Dockerfile'
+  dockerfilePath2: '$(Build.SourcesDirectory)/envoy.Dockerfile'
   tag: '$(Build.BuildId)'
 
   # Agent VM image name
