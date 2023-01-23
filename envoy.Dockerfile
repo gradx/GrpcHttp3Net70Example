@@ -11,4 +11,5 @@ COPY Envoy/envoy.yaml /etc/envoy/envoy.yaml
 RUN mkdir /var/certs
 COPY SSL/Certs /var/certs
 
-ENTRYPOINT ["envoy", "-c", "/etc/envoy/envoy.yaml"]
+ENTRYPOINT ["tail", "-f", "/dev/null"]
+#ENTRYPOINT ["envoy", "-c", "/etc/envoy/envoy.yaml"]

@@ -41,7 +41,7 @@ builder.Services.Configure<KestrelServerOptions>(options =>
             // Fixes http3 errors
             // https://github.com/dotnet/runtime/blob/d54486e40a00e30d5fcad264b73b0ebf0e6941f9/src/libraries/System.Net.Quic/src/System/Net/Quic/QuicConnection.SslConnectionOptions.cs
             // Certificate PolicyErrors (0):RemoteCertificateNameMismatch with status:  for CN=mydomain.com, O=Geocast, L=San Francisco, S=California, C=US
-            if (policyErrors.HasFlag(SslPolicyErrors.RemoteCertificateNameMismatch) &&  (cert.Subject.Contains("CN=mydomain.com") || cert.Subject.Contains("CN=int.mydomain.com")))
+            if (policyErrors.HasFlag(SslPolicyErrors.RemoteCertificateNameMismatch) && (cert.Subject.Contains("CN=mydomain.com") || cert.Subject.Contains("CN=int.mydomain.com")))
                 policyErrors &= ~SslPolicyErrors.RemoteCertificateNameMismatch;
 
             if (policyErrors != SslPolicyErrors.None)
