@@ -105,6 +105,6 @@ RUN dotnet build Http3GrpcUnitTest.csproj
 RUN chmod a+x /app/SSL/hosts.sh
 
 WORKDIR /app/GrpcService/bin/Debug/net7.0
-#ENTRYPOINT ["tail", "-f", "/dev/null"]
-ENTRYPOINT /app/SSL/hosts.sh
+ENTRYPOINT ["tail", "-f", "/dev/null"]
+#ENTRYPOINT /app/SSL/hosts.sh
 
